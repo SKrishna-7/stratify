@@ -1,0 +1,132 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- 1. COURSES MODULE ---
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+
+  startDate   DateTime?
+  endDate     DateTime?
+
+  progress         Float   @default(0)
+  totalModules     Int     @default(0)
+  completedModules Int     @default(0)
+  color            String  @default("bg-blue-500")
+  icon             String  @default("📚")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 👇 ADD THIS LINE BACK!
+  modules     Module[]  
+}
+model Module {
+  id       String @id @default(uuid())
+  title    String
+  status   String @default("pending") // 'pending' | 'in-progress' | 'completed'
+  
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  topics   Topic[]
+}
+
+model Topic {
+  id           String  @id @default(uuid())
+  title        String
+  duration     String  @default("15 min")
+  isCompleted  Boolean @default(false)
+  isFocus      Boolean @default(false) // "Added to Today"
+  
+  // Focus Room Data
+  note         String? @db.Text
+  resourceUrl  String?
+  resourceMode String? // 'video' | 'whiteboard' | 'browser'
+
+  moduleId     String
+  module       Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+}
+
+// --- 2. KANBAN (TASKS) ---
+model TaskColumn {
+  id    String @id @default(uuid())
+  title String // "Todo", "In Progress", "Done"
+  order Int    @default(0)
+  
+  tasks Task[]
+}
+
+model Task {
+  id        String   @id @default(uuid())
+  content   String
+  priority  String   @default("low") // 'low' | 'medium' | 'high'
+  order     Int      @default(0)
+  
+  columnId  String
+  column    TaskColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+}
+
+// --- 3. APPLICATIONS TRACKER ---
+model JobApplication {
+  id          String   @id @default(uuid())
+  company     String
+  position    String
+  status      String   // 'Applied' | 'Interview' | 'Offer' | 'Rejected'
+  salary      String?
+  location    String?
+  dateApplied DateTime @default(now())
+}
+
+// --- 4. FLASHCARDS ---
+model Deck {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  color       String   @default("bg-purple-500")
+  
+  cards       Flashcard[]
+}
+
+model Flashcard {
+  id      String @id @default(uuid())
+  front   String
+  back    String
+  mastery String @default("new") // 'new' | 'hard' | 'medium' | 'easy'
+  
+  deckId  String
+  deck    Deck   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+}
+
+// --- 5. PLANNER ---
+model Event {
+  id        String   @id @default(uuid())
+  title     String
+  subtitle  String?
+  type      String   // 'Class' | 'Study' | 'Test'...
+  date      String   // YYYY-MM-DD string for filtering
+  startTime String
+  isDone    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
+model Goal {
+  id        String   @id @default(uuid())
+  title     String   // e.g., "Solve 50 Problems"
+  type      String   // 'weekly' | 'monthly'
+  current   Int      @default(0)
+  target    Int
+  isDone    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+}
