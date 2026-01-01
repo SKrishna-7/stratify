@@ -33,13 +33,14 @@ export async function getCourses() {
       const progress = totalTopics === 0 ? 0 : Math.round((completedTopics / totalTopics) * 100);
       
       return {
-        ...course,
-        progress,
-        totalModules: course.modules.length,
-        completedModules: course.modules.filter(m => m.status === 'completed').length,
-          startDate: course.startDate ?? undefined,
+  ...course,
+  progress,
+  totalModules: course.modules.length,
+  completedModules: course.modules.filter(m => m.status === "completed").length,
+  startDate: course.startDate ?? undefined,
   endDate: course.endDate ?? undefined,
-      };
+};
+
     });
   } catch (error) {
     console.error("Failed to fetch courses:", error);
