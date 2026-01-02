@@ -281,6 +281,90 @@ export default function CoursesPage() {
       </button>
     </div>
   </div>
+
+  {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-[#090909] border border-zinc-800 p-8 md:p-10 rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-8">
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Initialize Course</h3>
+                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Add New Strategic Track</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="text-zinc-600 hover:text-white transition-colors p-2"><X size={24} /></button>
+            </div>
+
+            <div className="space-y-6 mb-8">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Course Title</label>
+                <input autoFocus type="text" placeholder="E.G. DATA STRUCTURES & ALGORITHMS" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Description</label>
+                <textarea placeholder="OPTIONAL PARAMETERS..." className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all h-24 resize-none" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Start Date</label>
+                  <input type="date" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest [color-scheme:dark]" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Estimated End</label>
+                  <input type="date" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest [color-scheme:dark]" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-4 text-zinc-600 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Abort</button>
+              <button onClick={handleAddCourse} disabled={isSubmitting || !newTitle.trim()} className="flex-[2] py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all flex items-center justify-center gap-2">
+                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingCourse && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-[#090909] border border-zinc-800 p-8 md:p-10 rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-8">
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Modify Repository</h3>
+                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Update Strategic Track</p>
+              </div>
+              <button onClick={() => setEditingCourse(null)} className="text-zinc-600 hover:text-white transition-colors p-2"><X size={24} /></button>
+            </div>
+
+            <div className="space-y-6 mb-8">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Course Title</label>
+                <input type="text" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Description</label>
+                <textarea className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest h-24 resize-none" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Start Date</label>
+                  <input type="date" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest [color-scheme:dark]" value={editStartDate} onChange={(e) => setEditStartDate(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Estimated End</label>
+                  <input type="date" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest [color-scheme:dark]" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button onClick={() => setEditingCourse(null)} className="flex-1 py-4 text-zinc-600 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Cancel</button>
+              <button onClick={handleUpdateCourse} disabled={isUpdating || !editTitle.trim()} className="flex-[2] py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all flex items-center justify-center gap-2">
+                {isUpdating ? <Loader2 size={16} className="animate-spin" /> : 'Update'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 </div>
   );
 }
