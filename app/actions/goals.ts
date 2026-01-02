@@ -15,7 +15,6 @@ export async function createStrategicGoal(data: {
 }) {
   try {
     const { userId } = await auth();
-    console.log("ACTION ATTEMPT BY USER:", userId);
 
     if (!userId) {
       return { success: false, error: "Unauthorized: Please sign in again." };

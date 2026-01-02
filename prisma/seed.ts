@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 async function main() {
   const MY_CLERK_ID = "user_37c6LxPbztlVCNZhFmGCS1Kenhl";
 
-  console.log("🚀 Initializing System Override for User:", MY_CLERK_ID);
 
   // 1. CLEANUP (Optional: Remove if you want to keep existing data)
   // We use deleteMany with the specific userId to only clear YOUR data

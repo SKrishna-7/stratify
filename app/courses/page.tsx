@@ -10,6 +10,7 @@ import Link from "next/link";
 // Make sure updateCourseAction is imported here
 import { getCourses, createCourseAction, updateCourseAction } from "@actions/course"; 
 import { CourseMenu } from "@components/CourseMenu"; 
+import { DashboardLoader } from "@components/Loader";
 
 // --- TYPES ---
 interface Course {
@@ -141,240 +142,145 @@ export default function CoursesPage() {
   };
 
   // Loading State
+  // if (!isLoaded) return (
+  //   <div className="h-full flex items-center justify-center">
+  //     <Loader2 size={32} className="animate-spin text-primary" />
+  //   </div>
+  // );
+
   if (!isLoaded) return (
-    <div className="h-full flex items-center justify-center">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
+  <DashboardLoader/>
   );
+
 
   const activeCourse = courses.length > 0 ? courses[0] : null;
 
   return (
-    <div className="h-full flex flex-col gap-8 p-2">
+ <div className="h-full flex flex-col gap-10 p-4 bg-black text-white">
+  
+  {/* 1. PAGE HEADER */}
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-zinc-900">
+    <div>
+      <h1 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Learning Repository</h1>
+      <span className="text-2xl font-black text-white uppercase italic">My Strategic Tracks</span>
+    </div>
+    
+    <button 
+      onClick={() => setIsModalOpen(true)}
+      className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 shadow-lg shadow-white/5"
+    >
+      <Plus size={14} /> Create Course
+    </button>
+  </div>
+
+  {/* 2. HERO SECTION (ACTIVE COURSE) */}
+  {activeCourse && (
+    <div className="relative overflow-hidden bg-[#090909] border border-zinc-900 rounded-[2.5rem] p-10 shadow-2xl group">
+      {/* HUD Accents */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px] pointer-events-none" />
       
-      {/* 1. PAGE HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">My Courses</h1>
-          <p className="text-text-secondary text-sm">Library of your active learning paths.</p>
+      <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="bg-zinc-800/50 border border-zinc-700/50 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest text-emerald-500 flex items-center gap-2">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ready to Resume
+            </span>
+          </div>
+          <div>
+            <h2 className="text-3xl font-black tracking-tighter uppercase italic leading-none text-zinc-100 mb-3">
+              {activeCourse.title}
+            </h2>
+            <p className="text-zinc-500 text-xs max-w-md font-medium italic leading-relaxed">
+              {activeCourse.description || "Operational parameters defined."}
+            </p>
+          </div>
+          <div className="flex items-center gap-6 text-[10px] font-black text-zinc-600 uppercase tracking-widest">
+            <span className="flex items-center gap-2"><CheckCircle2 size={14} /> {activeCourse.completedModules}/{activeCourse.totalModules} Units</span>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
-          >
-            <Plus size={18} /> Create Course
-          </button>
+
+        <div className="w-full lg:w-72 space-y-5">
+          <div className="flex justify-between items-end">
+            <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Unit Progress</span>
+            <span className="text-xl font-black text-emerald-500">{activeCourse.progress}%</span>
+          </div>
+          
+          {/* Dashboard-Style Gradient Progress Bar */}
+          <div className="h-2.5 w-full bg-zinc-900 border border-zinc-800/50 rounded-full overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-[#FF5F6D] via-[#FFC371] to-[#2ecc71] transition-all duration-1000 shadow-[0_0_15px_rgba(46,204,113,0.2)]"
+              style={{ width: `${activeCourse.progress}%` }} 
+            />
+          </div>
+          
+          <Link href={`/courses/${activeCourse.id}`} className="block w-full pt-2">
+            <button className="w-full py-4 bg-white text-black font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl hover:bg-zinc-200 transition-all active:scale-95">
+   Continue Learning
+</button>
+          </Link>
         </div>
       </div>
+      <GraduationCap size={300} className="absolute -right-16 -bottom-16 text-white/5 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-1000" />
+    </div>
+  )}
 
-      {/* 2. HERO SECTION */}
-      {activeCourse && (
-        <div className="relative overflow-hidden bg-gradient-to-r from-surface to-surface-highlight border border-border rounded-2xl p-8 shadow-sm group">
-          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-accent-blue uppercase tracking-wider">
-                <PlayCircle size={14} className="animate-pulse" /> Ready to Resume
+  {/* 3. COURSE GRID */}
+  <div className="space-y-8">
+    <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-3">
+      <BookOpen size={16} /> Track Inventory
+    </h3>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {courses.map((course) => (
+        <Link href={`/courses/${course.id}`} key={course.id}>
+          <div className="group h-full bg-[#090909] border border-zinc-900 rounded-[2rem] p-8 hover:border-zinc-700 hover:shadow-[0_0_30px_rgba(0,0,0,0.5)] transition-all cursor-pointer flex flex-col">
+            
+            <div className="flex justify-between items-start mb-8">
+              <div className={`w-14 h-14 rounded-2xl bg-zinc-900 flex items-center justify-center border border-zinc-800 group-hover:border-zinc-700 transition-colors`}>
+                <div className={`w-3 h-3 rounded-full ${course.color === 'bg-primary' ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`} />
               </div>
-              <div>
-                <h2 className="text-3xl font-bold text-text-primary mb-2">{activeCourse.title}</h2>
-                <p className="text-text-secondary max-w-md">{activeCourse.description || "No description provided."}</p>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-text-muted">
-                <span className="flex items-center gap-2"><CheckCircle2 size={16} /> {activeCourse.completedModules}/{activeCourse.totalModules} Modules</span>
-              </div>
+              <CourseMenu courseId={course.id} 
+                  onDeleteSuccess={handleRemoveCourse}
+                  onEdit={() => openEditModal(course)}/>
             </div>
 
-            <div className="w-full md:w-64 space-y-3">
-              <div className="flex justify-between text-sm font-medium">
-                 <span className="text-text-primary">Current Progress</span>
-                 <span className="text-primary">{activeCourse.progress}%</span>
+            <div className="flex-1">
+              <h3 className="text-lg font-black text-zinc-100 uppercase italic mb-3 group-hover:text-white transition-colors">
+                {course.title}
+              </h3>
+              <p className="text-xs text-zinc-600 font-medium italic line-clamp-2 leading-relaxed mb-6">
+                {course.description || "No parameters provided."}
+              </p>
+            </div>
+
+            <div className="mt-4 pt-6 border-t border-zinc-900/50">
+              <div className="flex justify-between text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-3">
+                <span>{course.completedModules} / {course.totalModules} Units</span>
+                <span className="text-zinc-400">{course.progress}%</span>
               </div>
-              <div className="h-3 w-full bg-surface-highlight/50 border border-white/5 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-zinc-950 rounded-full overflow-hidden border border-zinc-900">
                 <div 
-                  className={`h-full ${activeCourse.color} rounded-full transition-all duration-1000`} 
-                  style={{ width: `${activeCourse.progress}%` }} 
+                  className={`h-full ${course.color === 'bg-primary' ? 'bg-indigo-500' : 'bg-emerald-500'} rounded-full transition-all duration-500`} 
+                  style={{ width: `${course.progress}%` }} 
                 />
               </div>
-              <Link href={`/courses/${activeCourse.id}`} className="block w-full">
-                <button className="w-full py-3 bg-primary text-white font-medium rounded-xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20">
-                  Continue Learning
-                </button>
-              </Link>
             </div>
           </div>
-          <GraduationCap size={300} className="absolute -right-10 -bottom-10 text-white/5 rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-700" />
+        </Link>
+      ))}
+
+      {/* "Add New" Card */}
+      <button 
+        onClick={() => setIsModalOpen(true)}
+        className="h-full min-h-[300px] border-2 border-dashed border-zinc-900 rounded-[2rem] flex flex-col items-center justify-center gap-4 text-zinc-700 hover:text-white hover:border-zinc-700 hover:bg-zinc-900/20 transition-all group"
+      >
+        <div className="w-16 h-16 rounded-full bg-zinc-900 group-hover:bg-zinc-800 flex items-center justify-center transition-colors border border-zinc-800">
+          <Plus size={32} />
         </div>
-      )}
-
-      {/* 3. COURSE GRID */}
-      <div>
-        <h3 className="font-semibold text-text-primary mb-6 flex items-center gap-2">
-          <BookOpen size={20} className="text-text-muted" /> All Courses
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <Link href={`/courses/${course.id}`} key={course.id}>
-              <div className="group h-full bg-surface border border-border rounded-2xl p-6 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer flex flex-col">
-                
-                <div className="flex justify-between items-start mb-6">
-                  {/* Icon Box */}
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${course.color}/10 transition-colors`}>
-                    <div className={`w-4 h-4 rounded-full ${course.color}`} />
-                  </div>
-
-                  {/* Menu with Edit Prop */}
-                  <CourseMenu 
-                    courseId={course.id} 
-                    onDeleteSuccess={handleRemoveCourse} 
-                    onEdit={() => openEditModal(course)} // <--- CONNECTING EDIT HERE
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-text-primary mb-2 group-hover:text-primary transition-colors">
-                    {course.title}
-                  </h3>
-                  <p className="text-sm text-text-secondary line-clamp-2 mb-4">
-                    {course.description || "No description provided."}
-                  </p>
-                  
-                  {(course.startDate || course.endDate) && (
-                    <div className="flex flex-wrap gap-2 text-xs text-text-muted mb-4">
-                       {course.startDate && <span>Start: {new Date(course.startDate).toLocaleDateString()}</span>}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-border/50">
-                  <div className="flex justify-between text-xs text-text-muted mb-2">
-                    <span>{course.completedModules} / {course.totalModules} Topics</span>
-                    <span>{course.progress}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-surface-highlight rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full ${course.color} rounded-full transition-all duration-500`} 
-                      style={{ width: `${course.progress}%` }} 
-                    />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-
-          {/* "Add New" Card */}
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="h-full min-h-[250px] border border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 text-text-muted hover:text-primary hover:border-primary hover:bg-surface-highlight/30 transition-all group"
-          >
-            <div className="w-16 h-16 rounded-full bg-surface-highlight group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-              <Plus size={32} />
-            </div>
-            <span className="font-medium">Create New Course</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 4. CREATE COURSE MODAL */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setIsModalOpen(false);
-          }}
-        >
-          <div className="bg-surface border border-border p-6 rounded-2xl w-full max-w-md shadow-2xl relative animate-in zoom-in-95 duration-200">
-            <form onSubmit={(e) => { e.preventDefault(); handleAddCourse(); }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-text-primary">Create Course</h3>
-                <button type="button" onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary p-1 hover:bg-surface-highlight rounded-lg transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Course Title <span className="text-red-500">*</span></label>
-                  <input autoFocus type="text" required className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary transition-all" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Start Date</label>
-                        <input type="date" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary [color-scheme:dark] text-sm" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                    </div>
-                    <div>
-                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">End Date</label>
-                        <input type="date" min={startDate} className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary [color-scheme:dark] text-sm" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                    </div>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Description</label>
-                  <textarea className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary h-24 resize-none focus:outline-none focus:border-primary" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-highlight rounded-xl transition-colors font-medium">Cancel</button>
-                <button type="submit" disabled={isSubmitting || !newTitle.trim()} className="px-6 py-2 bg-primary text-white font-medium rounded-xl hover:bg-blue-600 active:scale-95 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50">
-                  {isSubmitting ? <Loader2 size={16} className="animate-spin"/> : null} Create Course
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 5. EDIT COURSE MODAL (NEW) */}
-      {editingCourse && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setEditingCourse(null);
-          }}
-        >
-          <div className="bg-surface border border-border p-6 rounded-2xl w-full max-w-md shadow-2xl relative animate-in zoom-in-95 duration-200">
-            <form onSubmit={(e) => { e.preventDefault(); handleUpdateCourse(); }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-text-primary">Edit Course</h3>
-                <button type="button" onClick={() => setEditingCourse(null)} className="text-text-secondary hover:text-text-primary p-1 hover:bg-surface-highlight rounded-lg transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Course Title <span className="text-red-500">*</span></label>
-                  <input autoFocus type="text" required className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary transition-all" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Start Date</label>
-                        <input type="date" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary [color-scheme:dark] text-sm" value={editStartDate} onChange={(e) => setEditStartDate(e.target.value)} />
-                    </div>
-                    <div>
-                        <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">End Date</label>
-                        <input type="date" min={editStartDate} className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary [color-scheme:dark] text-sm" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)} />
-                    </div>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5 block">Description</label>
-                  <textarea className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary h-24 resize-none focus:outline-none focus:border-primary" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-surface-highlight rounded-xl transition-colors font-medium">Cancel</button>
-                <button type="submit" disabled={isUpdating || !editTitle.trim()} className="px-6 py-2 bg-primary text-white font-medium rounded-xl hover:bg-blue-600 active:scale-95 transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2 disabled:opacity-50">
-                  {isUpdating ? <Loader2 size={16} className="animate-spin"/> : null} Save Changes
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
+        <span className="text-[10px] font-black uppercase tracking-widest">Create New Course</span>
+      </button>
     </div>
+  </div>
+</div>
   );
 }

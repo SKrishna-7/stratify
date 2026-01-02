@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Search, MoreHorizontal, Calendar, 
   MessageSquare, Paperclip, CheckCircle2, 
-  Circle, Clock, Trash2, Loader2 
+  Circle, Clock, Trash2, Loader2, 
+  X
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { 
   getBoardData, createTaskAction, moveTaskAction, deleteTaskAction 
 } from "@actions/kaban";
+import { DashboardLoader } from "@components/Loader";
 
 // --- TYPES ---
 interface Task {
@@ -123,11 +125,8 @@ const handleAddTask = async () => {
     if (!searchQuery) return tasks;
     return tasks.filter(t => t.content.toLowerCase().includes(searchQuery.toLowerCase()));
   };
-
-  if (!isLoaded) return (
-    <div className="h-full flex items-center justify-center">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
+ if (!isLoaded) return (
+    <DashboardLoader/>
   );
 
   return (
@@ -136,26 +135,25 @@ const handleAddTask = async () => {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">My Tasks</h1>
-          <p className="text-text-secondary text-sm">Drag cards to update their status.</p>
+          <span className="text-2xl font-black text-white uppercase italic">My Tasks</span>
+          <h1 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mt-1">Drag cards to update their status.</h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search tasks..." 
-              className="bg-surface border border-border rounded-xl pl-10 pr-4 py-2 text-sm text-text-primary focus:outline-none w-64 focus:border-primary/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <input 
+          type="text" 
+          placeholder="SEARCH..." 
+          className="bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-[10px] font-bold text-white focus:outline-none w-64 focus:border-indigo-500 uppercase tracking-widest placeholder:text-zinc-600 transition-all"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
           </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
-          >
-            <Plus size={18} /> Add Task
-          </button>
+        onClick={() => setIsModalOpen(true)}
+        className="flex items-center gap-2 px-6 py-2.5 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 shadow-lg shadow-white/5"
+      >
+        <Plus size={14} /> Add Task
+      </button>
         </div>
       </div>
 
@@ -165,18 +163,42 @@ const handleAddTask = async () => {
           <div className="flex gap-6 min-w-[1000px] h-full">
             
             {columns.map((col) => (
-              <KanbanColumn 
+          <div key={col.id} className="flex-1 flex flex-col min-w-[320px] bg-[#090909] border border-zinc-900 rounded-[2.5rem] p-6 shadow-2xl">
+             {/* Column Header */}
+             <div className="flex items-center justify-between mb-6 px-2">
+                <div className="flex items-center gap-3">
+                   <div className={`w-1.5 h-4 rounded-full ${col.title === 'Todo' ? 'bg-zinc-700' : col.title === 'In Progress' ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`} />
+                   <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] italic">{col.title}</h3>
+                </div>
+                <span className="text-[10px] font-black text-zinc-700 bg-black border border-zinc-900 px-2.5 py-1 rounded-md">
+                  {col.tasks.length}
+                </span>
+             </div>
+
+             {/* Draggable Area */}
+             <KanbanColumn 
+
                 key={col.id}
+
                 id={col.id}
+
                 title={col.title}
+
                 count={col.tasks.length}
+
                 // Map generic icons based on title for visual consistency
+
                 icon={col.title === 'Todo' ? Circle : col.title === 'In Progress' ? Clock : CheckCircle2}
+
                 color={col.title === 'Todo' ? 'text-text-muted' : col.title === 'In Progress' ? 'text-orange-500' : 'text-green-500'}
+
                 tasks={getFilteredTasks(col.tasks)}
+
                 onDelete={handleDeleteTask}
+
               />
-            ))}
+          </div>
+        ))}
 
           </div>
         </div>
@@ -186,53 +208,72 @@ const handleAddTask = async () => {
       
 
       {isModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div className="bg-surface border border-border p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95">
-      <h3 className="text-lg font-bold text-text-primary mb-4">New Task</h3>
-      
-      {/* Task Title Input */}
-      <input 
-        autoFocus
-        type="text" 
-        placeholder="Task name..." 
-        className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary mb-4"
-        value={newTaskContent}
-        onChange={(e) => setNewTaskContent(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleAddTask()}
-      />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      <div className="bg-[#090909] border border-zinc-800 p-10 rounded-[2.5rem] w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300">
+        
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">Initialize Task</h3>
+          <button onClick={() => setIsModalOpen(false)} className="text-zinc-600 hover:text-white transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+        
+        <div className="space-y-8">
+          {/* Content Input */}
+          <div className="space-y-4">
+            <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Task</label>
+            <input 
+              autoFocus
+              type="text" 
+              placeholder="ENTER TASK NAME..." 
+              className="w-full bg-black border border-zinc-900 rounded-2xl p-5 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 placeholder:text-zinc-800 uppercase tracking-widest transition-all"
+              value={newTaskContent}
+              onChange={(e) => setNewTaskContent(e.target.value)}
+            />
+          </div>
 
-      {/* NEW: Priority Selector */}
-      <div className="mb-6">
-        <label className="text-xs font-bold text-text-secondary uppercase mb-2 block">Priority</label>
-        <div className="flex gap-2">
-          {['low', 'medium', 'high'].map((p) => (
-            <button
-              key={p}
-              onClick={() => setNewTaskPriority(p)}
-              className={`
-                flex-1 py-2 rounded-lg text-xs font-bold capitalize border transition-all
-                ${newTaskPriority === p 
-                  ? (p === 'high' ? 'bg-red-500 text-white border-red-500' : p === 'medium' ? 'bg-orange-500 text-white border-orange-500' : 'bg-green-500 text-white border-green-500') 
-                  : 'bg-surface border-border text-text-muted hover:border-primary/50'
-                }
-              `}
+          {/* Priority Selector */}
+          <div className="space-y-4">
+            <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Execution Priority</label>
+            <div className="flex gap-3">
+              {['low', 'medium', 'high'].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setNewTaskPriority(p)}
+                  className={`
+                    flex-1 py-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all
+                    ${newTaskPriority === p 
+                      ? (p === 'high' ? 'bg-rose-500 border-rose-400 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]' : p === 'medium' ? 'bg-indigo-500 border-indigo-400 text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-emerald-500 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]') 
+                      : 'bg-black border-zinc-900 text-zinc-600 hover:border-zinc-700'
+                    }
+                  `}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-4 pt-4">
+            <button 
+              onClick={() => setIsModalOpen(false)} 
+              className="flex-1 py-5 text-zinc-600 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
             >
-              {p}
+              Cancle
             </button>
-          ))}
+            <button 
+              onClick={handleAddTask} 
+              disabled={isSubmitting || !newTaskContent.trim()} 
+              className="flex-[2] py-5 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-lg flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Confirm Task'}
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Footer Buttons */}
-      <div className="flex justify-end gap-3">
-        <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary">Cancel</button>
-        <button onClick={handleAddTask} disabled={isSubmitting} className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2">
-          {isSubmitting && <Loader2 size={14} className="animate-spin" />} Create
-        </button>
-      </div>
     </div>
-  </div>
-)}
+  )}
     </div>
   );
 }

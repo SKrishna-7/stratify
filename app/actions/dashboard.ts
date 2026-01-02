@@ -95,7 +95,6 @@ export async function getDashboardStats() {
     // If no user is logged in, return null (Middleware usually prevents this anyway)
     if (!userId) return null;
 
-  console.log("USER ID:", userId);
     const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
     const now = new Date();
     let currentStreak = dbUser?.streak || 0;
@@ -149,12 +148,7 @@ export async function getDashboardStats() {
     const goals = await db.goal.findMany({
       where: { 
         userId: userId, // DATA ISOLATION FILTER
-        isDone: false 
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 4 
-    });
-    console.log(goals)
+      },});
 
      const plannerEvents = await db.scheduleEvent.findMany({
   where: { userId },

@@ -12,6 +12,7 @@ import { GoalItem } from "@components/GoalItem";
 import { StatsOverview } from "@components/StatsOverview";
 import { ActivityHeatmap } from "@components/ActivityHeatmap";
 import { toggleGoalAction } from "@actions/goals";
+import { DashboardLoader } from "@components/Loader";
 
 // Import your goal action if defined elsewhere
 // import { toggleGoalAction } from "@actions/goals"; 
@@ -41,7 +42,6 @@ export default function Dashboard({ initialData }: { initialData: DashboardData 
   const [authStatus, setAuthStatus] = useState<{ msg: string; type: 'success' | 'info' } | null>(null);
 
 
-  console.log("DASH data : ",data)
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
@@ -83,10 +83,8 @@ export default function Dashboard({ initialData }: { initialData: DashboardData 
   };
 
 
-  if (!isLoaded) return (
-    <div className="h-screen flex items-center justify-center bg-black">
-      <Loader2 size={32} className="animate-spin text-indigo-500 opacity-40" />
-    </div>
+  if (!isLoaded || isPending) return (
+    <DashboardLoader/>
   );
   const {
     user,
@@ -100,14 +98,28 @@ export default function Dashboard({ initialData }: { initialData: DashboardData 
 
   } = data;
 
-  const imminentGoal = goals
-    ?.filter((g: any) => !g.isDone)
+  const imminentGoal =
+  goals
+    ?.filter((g: any) => !g.isDone && g.target > 0)
     .sort((a: any, b: any) => {
-      const progressA = (a.current / a.target);
-      const progressB = (b.current / b.target);
-      return progressB - progressA;
-    })[0];
+      const remainingA = a.target - a.current;
+      const remainingB = b.target - b.current;
+      return remainingA - remainingB;
+    })[0]
+  ??
+  goals
+    ?.filter((g: any) => g.isDone)
+    .sort(
+      (a: any, b: any) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
+    )[0]
+  ??
+  null;
 
+
+
+    
   const updatePlannerOptimistic = (updater: (events: any[]) => any[]) => {
     setData((prev: any) => ({
       ...prev,
@@ -178,7 +190,7 @@ export default function Dashboard({ initialData }: { initialData: DashboardData 
                 <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Day Streak</span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm uppercase">
+            <div className="w-10 h-10 rounded-xl bg-emerald-900 flex items-center justify-center text-white font-black text-sm uppercase">
               {user?.name?.charAt(0) || "U"}
             </div>
           </div>
@@ -273,7 +285,7 @@ export default function Dashboard({ initialData }: { initialData: DashboardData 
                   <Target size={20} className="text-zinc-600" />
                   <h2 className="text-xl font-black tracking-tighter uppercase italic">GOAL TRACKER</h2>
                 </div>
-                <button className="text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors">SEE HISTORY</button>
+                {/* <button className="text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors">SEE HISTORY</button> */}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

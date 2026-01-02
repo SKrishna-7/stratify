@@ -20,7 +20,7 @@ export function ActivityHeatmap({ activityData }: { activityData: Record<string,
           </div>
           <div>
             <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Consistency Monitor</h3>
-            <p className="text-xl font-black text-white tracking-tighter uppercase italic">Daily Activity Trajectory</p>
+            <p className="text-xl font-black text-white tracking-tighter uppercase italic">Daily Activity</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-[9px] font-black text-zinc-700 uppercase tracking-widest">

@@ -39,6 +39,8 @@
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-border: 220 13% 91%; 
+
+    --app-bg: #050505;
   }
 
   .dark {
@@ -114,4 +116,20 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--primary)); /* Blue on hover */
   }
+}
+
+.main-content {
+  background-color: var(--app-bg);
+}
+
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #090909 25%, #151515 50%, #090909 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
 }

@@ -11,6 +11,7 @@ import Link from "next/link";
 import { deleteGoalAction } from "@actions/goals";
 import { getGoalById } from "@actions/goals";
 import { getCourses } from "@actions/course";
+import { DashboardLoader } from "@components/Loader";
 
 export default function GoalDetailPage() {
   const { id } = useParams();
@@ -40,9 +41,9 @@ export default function GoalDetailPage() {
     setGoalState(data);
   }, [data]);
 
-  console.log(data)
-  if (loading) return <div className="h-screen bg-black flex items-center justify-center text-zinc-700 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">Initializing Goal...</div>;
-
+ if (loading) return (
+    <DashboardLoader/>
+  );
   const goal = data?.goal;      // ← IMPORTANT (because getGoalById returns { goal, target })
   const target = data?.target;
   if (!goal) return <div className="h-screen bg-black flex items-center justify-center text-zinc-700 uppercase tracking-widest">Objective Offline</div>;
@@ -71,21 +72,51 @@ const completedTopics = allTopics.filter(
   (t: any) => t.isCompleted
 ).length;
 const completedUnits = allTopics
-  .filter((t: any) => t.isCompleted && t.completedAt)
+  .filter((t: any) => t.isCompleted || t.completedAt)
   .sort(
     (a: any, b: any) =>
       new Date(b.completedAt).getTime() -
-      new Date(a.completedAt).getTime()
+      new Date(a.completedAt).getTime() || ''
   ) || [];
 
 
-  console.log("completed" , completedUnits)
+  function calculateGoalProgress(goal: any, linkedCourse?: any) {
+  if (goal.category === "COURSE" && linkedCourse) {
+    const totalTopics = linkedCourse.modules.flatMap((m: any) => m.topics).length;
+    const completedTopics = linkedCourse.modules
+      .flatMap((m: any) => m.topics)
+      .filter((t: any) => t.isCompleted).length;
+
+    return totalTopics > 0
+      ? Math.round((completedTopics / totalTopics) * 100)
+      : 0;
+  }
+
+  if (goal.category === "MODULE" && linkedCourse) {
+    const module = linkedCourse.modules.find(
+      (m: any) => m.id === goal.targetId
+    );
+
+    if (!module) return 0;
+
+    const total = module.topics.length;
+    const completed = module.topics.filter((t: any) => t.isCompleted).length;
+
+    return total > 0
+      ? Math.round((completed / total) * 100)
+      : 0;
+  }
+
+  // fallback (simple numeric goals)
+  return goal.target > 0
+    ? Math.min(100, Math.round((goal.current / goal.target) * 100))
+    : 0;
+}
 
 const progress =
   allTopics.length === 0
     ? 0
     : Math.round((completedTopics / allTopics.length) * 100);
-  console.log(linkedCourse)
 
   // console.log(allTopics)
 

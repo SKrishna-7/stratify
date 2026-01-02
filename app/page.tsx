@@ -16,9 +16,9 @@ export default async function Page() {
     user: null,
     activityData: {},
     recentCourse: null,
-    goals: [],
     activeCourses: [],
     allCourses:[],
+    goals: [],
     plannerEvents: [],  };
 
   return (

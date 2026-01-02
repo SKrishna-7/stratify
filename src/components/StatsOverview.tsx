@@ -16,7 +16,17 @@ interface StatsOverviewProps {
 
 export function StatsOverview({ courseCount, applicationCount, imminentGoal }: StatsOverviewProps) {
   // Simple calculation for progress percentage
-  const progress = imminentGoal ? Math.round((imminentGoal.current / imminentGoal.target) * 100) : 0;
+const progress = imminentGoal
+  ? Math.round((imminentGoal.current / imminentGoal.target) * 100)
+  : 0;
+
+
+const isCompleted = imminentGoal?.isDone;
+const isUrgent =
+  imminentGoal?.deadline &&
+  !isCompleted &&
+  new Date(imminentGoal.deadline).getTime() - Date.now() <
+    3 * 24 * 60 * 60 * 1000; // < 3 days
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

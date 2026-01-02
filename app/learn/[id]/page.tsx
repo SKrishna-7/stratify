@@ -13,6 +13,7 @@ import {
   saveResourceAction, 
   completeTopicAction 
 } from "@actions/focus-room";
+import { DashboardLoader } from "@components/Loader";
 
 type ResourceMode = 'video' | 'whiteboard' | 'browser';
 
@@ -134,12 +135,9 @@ export default function FocusRoom() {
     } catch (e) { return null; }
   };
 
-  if (!isLoaded) return (
-    <div className="h-screen flex items-center justify-center bg-surface">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
-  );
-
+   if (!isLoaded) return (
+      <DashboardLoader/>
+    );
   return (
     <div className="h-screen flex flex-col bg-surface-highlight/10">
       

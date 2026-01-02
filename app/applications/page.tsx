@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { 
   Plus, Search, MoreHorizontal, Calendar, 
   MapPin, DollarSign, Briefcase, 
-  Trash2, ExternalLink, Loader2 
+  Trash2, ExternalLink, Loader2, 
+  X
 } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { 
   getApplications, createApplicationAction, updateStatusAction, deleteApplicationAction 
 } from "@actions/application";
+import { DashboardLoader } from "@components/Loader";
 
 // --- TYPES ---
 // We map DB fields to UI fields here
@@ -120,92 +122,125 @@ export default function ApplicationsPage() {
     );
   };
 
-  if (!isLoaded) return (
-    <div className="h-full flex items-center justify-center">
-      <Loader2 size={32} className="animate-spin text-primary" />
-    </div>
-  );
+   if (!isLoaded) return (
+      <DashboardLoader/>
+    );
 
   return (
     <div className="h-full flex flex-col gap-6 p-2">
       
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Application Tracker</h1>
-          <p className="text-text-secondary text-sm">Track your journey from Application to Offer.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={16} />
-            <input 
-              type="text" 
-              placeholder="Search company..." 
-              className="bg-surface border border-border rounded-xl pl-10 pr-4 py-2 text-sm text-text-primary focus:outline-none w-64 focus:border-primary/50"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-zinc-900">
+    <div>
+      <span className="text-2xl font-black text-white uppercase tracking-tighter">Application Tracker</span>
+      <h1 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Track your journey from Application to Offer. </h1>
+    </div>
+        <div className="flex items-center gap-4">
+      {/* Search HUD */}
+      <div className="relative hidden md:block">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={14} />
+        <input 
+          type="text" 
+          placeholder="SEARCH COMPANY..." 
+          className="bg-zinc-950 border border-zinc-900 rounded-xl pl-10 pr-4 py-2.5 text-[10px] font-bold text-white focus:outline-none w-64 focus:border-indigo-500 uppercase tracking-widest placeholder:text-zinc-800 transition-all"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
           <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
+        onClick={() => setIsModalOpen(true)}
+        className="flex items-center gap-2 px-6 py-2.5 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-95 shadow-lg shadow-white/5"
+      >
+        <Plus size={14} /> Add Application
+      </button>
+    </div>
+  </div>
+      {/* DRAG DROP BOARD */}
+      <DragDropContext onDragEnd={onDragEnd}>
+    <div className="flex-1 overflow-x-auto pb-6 custom-scrollbar">
+      <div className="flex gap-8 min-w-[1500px] h-full">
+        
+        {[
+          { id: 'applied', title: 'Applied', color: 'bg-zinc-700' },
+          { id: 'oa', title: 'Online Assessment', color: 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]' },
+          { id: 'interview', title: 'Interview', color: 'bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.4)]' },
+          { id: 'offer', title: 'Offer Issued', color: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' },
+          { id: 'rejected', title: 'Rejected', color: 'bg-rose-500' }
+        ].map((col) => (
+          <div key={col.id} className="flex-1 flex flex-col min-w-[300px] bg-[#090909] border border-zinc-900 rounded-[2.5rem] p-6 shadow-2xl">
+             {/* Column Header */}
+             <div className="flex items-center justify-between mb-6 px-2">
+                <div className="flex items-center gap-3">
+                   <div className={`w-1.5 h-4 rounded-full ${col.color}`} />
+                   <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] italic">{col.title}</h3>
+                </div>
+                <span className="text-[10px] font-black text-zinc-700 bg-black border border-zinc-900 px-2.5 py-1 rounded-md">
+                  {getAppsByStatus(col.id).length}
+                </span>
+             </div>
+
+             {/* Column Body */}
+             <Column 
+               id={col.id} 
+               apps={getAppsByStatus(col.id)} 
+               onDelete={handleDeleteApp} 
+             />
+          </div>
+        ))}
+
+      </div>
+    </div>
+  </DragDropContext>
+      {/* ADD MODAL */}
+      {isModalOpen && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+      <div className="bg-[#090909] border border-zinc-800 p-10 rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300">
+        
+        <div className="flex justify-between items-center mb-10">
+          <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none">Register Application</h3>
+          <button onClick={() => setIsModalOpen(false)} className="text-zinc-600 hover:text-white transition-colors p-2">
+            <X size={24} />
+          </button>
+        </div>
+        
+        <div className="space-y-6 mb-10">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Company Entity</label>
+              <input autoFocus type="text" placeholder="E.G. NVIDIA" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all" value={newCompany} onChange={(e) => setNewCompany(e.target.value)} />
+            </div>
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Designation</label>
+              <input type="text" placeholder="E.G. SDE-1" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all" value={newRole} onChange={(e) => setNewRole(e.target.value)} />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Compensation</label>
+              <input type="text" placeholder="E.G. 1.2L/MO" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all" value={newStipend} onChange={(e) => setNewStipend(e.target.value)} />
+            </div>
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-zinc-700 uppercase tracking-widest ml-1">Deployment Location</label>
+              <input type="text" placeholder="E.G. BENGALURU" className="w-full bg-black border border-zinc-900 rounded-2xl p-4 text-[11px] font-bold text-white focus:outline-none focus:border-indigo-500 uppercase tracking-widest transition-all" value={newLocation} onChange={(e) => setNewLocation(e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 text-zinc-600 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Abort</button>
+          <button 
+            onClick={handleAddApplication} 
+            disabled={isSubmitting || !newCompany.trim()} 
+            className="flex-[2] py-5 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all flex items-center justify-center gap-2"
           >
-            <Plus size={18} /> Add Application
+            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Confirm Registration'}
           </button>
         </div>
       </div>
-
-      {/* DRAG DROP BOARD */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex-1 overflow-x-auto pb-4 scrollbar-thin">
-          <div className="flex gap-4 min-w-[1400px] h-full">
-            
-            <Column id="applied" title="Applied" count={getAppsByStatus('applied').length} color="text-blue-400" apps={getAppsByStatus('applied')} onDelete={handleDeleteApp} />
-            <Column id="oa" title="Online Assessment" count={getAppsByStatus('oa').length} color="text-yellow-400" apps={getAppsByStatus('oa')} onDelete={handleDeleteApp} />
-            <Column id="interview" title="Interview" count={getAppsByStatus('interview').length} color="text-purple-400" apps={getAppsByStatus('interview')} onDelete={handleDeleteApp} />
-            <Column id="offer" title="Offer" count={getAppsByStatus('offer').length} color="text-green-400" apps={getAppsByStatus('offer')} onDelete={handleDeleteApp} />
-            <Column id="rejected" title="Rejected" count={getAppsByStatus('rejected').length} color="text-red-400" apps={getAppsByStatus('rejected')} onDelete={handleDeleteApp} />
-
-          </div>
-        </div>
-      </DragDropContext>
-
-      {/* ADD MODAL */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-surface border border-border p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95">
-            <h3 className="text-lg font-bold text-text-primary mb-4">Add Application</h3>
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="text-xs font-bold text-text-secondary uppercase mb-1 block">Company</label>
-                <input autoFocus type="text" placeholder="e.g. Google" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary" value={newCompany} onChange={(e) => setNewCompany(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-text-secondary uppercase mb-1 block">Role</label>
-                <input type="text" placeholder="e.g. SDE Intern" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary" value={newRole} onChange={(e) => setNewRole(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                 <div>
-                    <label className="text-xs font-bold text-text-secondary uppercase mb-1 block">Salary/Stipend</label>
-                    <input type="text" placeholder="e.g. 50k/mo" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary" value={newStipend} onChange={(e) => setNewStipend(e.target.value)} />
-                 </div>
-                 <div>
-                    <label className="text-xs font-bold text-text-secondary uppercase mb-1 block">Location</label>
-                    <input type="text" placeholder="e.g. Remote" className="w-full bg-surface-highlight border border-border rounded-xl p-3 text-text-primary focus:outline-none focus:border-primary" value={newLocation} onChange={(e) => setNewLocation(e.target.value)} />
-                 </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-text-secondary hover:text-text-primary">Cancel</button>
-              <button onClick={handleAddApplication} disabled={isSubmitting} className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2">
-                {isSubmitting && <Loader2 size={14} className="animate-spin" />} Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
+  )}
+</div> );
 }
 
 // --- COMPONENTS ---
@@ -215,7 +250,7 @@ function Column({ id, title, count, apps, color, onDelete }: any) {
     <div className="flex-1 flex flex-col h-full bg-surface/30 border border-border/50 rounded-2xl p-4 min-w-[280px]">
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${color.replace('text-', 'bg-')}`}></div>
+          <div className={`w-2 h-2 rounded-full ${color?.replace('bg-','bg-')}`}></div>
           <h3 className="font-semibold text-text-primary text-sm">{title}</h3>
           <span className="bg-surface border border-border text-xs text-text-secondary px-2 py-0.5 rounded-full">{count}</span>
         </div>

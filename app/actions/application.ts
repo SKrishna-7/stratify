@@ -14,7 +14,6 @@ export async function getApplications() {
       orderBy: { dateApplied: 'asc' }
     });
 
-    console.log("applications " , apps )
     return apps;
   } catch (error) {
     console.error("GET_APPS_ERROR:", error);

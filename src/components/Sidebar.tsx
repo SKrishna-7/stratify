@@ -43,10 +43,10 @@ export function Sidebar({ onClose }: SidebarProps) {
    <aside className="h-screen w-64 bg-black border-r border-zinc-900 flex flex-col fixed left-0 top-0 z-50">
       <div className="p-8 flex items-center justify-between border-b border-zinc-900/50">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
+          {/* <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
             <span className="text-white font-black text-xl italic text-shadow-sm">P</span>
-          </div>
-          <h1 className="text-xl font-black text-white tracking-tighter uppercase italic">PrepOS</h1>
+          </div> */}
+          <h1 className="text-2xl font-black text-white text-center uppercase">PrepOS</h1>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <SignInButton mode="modal">
         <button className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 transition-all">
           <LogIn size={16} />
-          Initialize Login
+          Login
         </button>
       </SignInButton>
     </div>
