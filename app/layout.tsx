@@ -4,14 +4,16 @@ import "./globals.css";
 import { Sidebar } from "@components/Sidebar";
 import { MobileSidebar } from "@components/MobileSidebar"; 
 import { ThemeProvider } from "@components/theme-provider";
-// 1. Import ClerkProvider
 import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PrepOS",
-  description: "Placement Command Center",
+  title: "Stratify",
+  description: "Stratify helps candidates prepare with structure and measurable progress.",
+  icons: {
+    icon: `/stratify.svg`,
+  },
 };
 
 export default function RootLayout({

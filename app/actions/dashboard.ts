@@ -97,18 +97,25 @@ export async function getDashboardStats() {
 
     const dbUser = await db.user.findUnique({ where: { clerkId: userId } });
     const now = new Date();
-    let currentStreak = dbUser?.streak || 0;
+   let currentStreak = dbUser?.streak || 0;
 
-    if (dbUser) {
-      const lastLogin = new Date(dbUser.lastLogin);
-      const diffInDays = Math.floor((now.getTime() - lastLogin.getTime()) / (1000 * 3600 * 24));
+if (dbUser?.lastLogin) {
+  const normalize = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-      if (diffInDays === 1) {
-        currentStreak += 1; // Logged in consecutive day
-      } else if (diffInDays > 1) {
-        currentStreak = 1; // Streak broken
-      }
-    }
+  const today = normalize(now);
+  const lastLogin = normalize(new Date(dbUser.lastLogin));
+
+  const diffInDays =
+    (today.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (diffInDays === 1) {
+    currentStreak += 1; // consecutive day
+  } else if (diffInDays > 1) {
+    currentStreak = 1; // streak broken
+  }
+}
+
 
 
     const user = await db.user.upsert({
@@ -116,7 +123,7 @@ export async function getDashboardStats() {
       update: {
       name: `${userObject?.firstName || ""} ${userObject?.lastName || ""}`.trim() || userObject?.username || "Explorer",        imageUrl: userObject?.imageUrl,
       streak: currentStreak,
-      lastLogin: now,
+      lastLogin: new Date(),
     
     },
       create: {

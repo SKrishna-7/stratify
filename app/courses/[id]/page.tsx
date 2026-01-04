@@ -24,7 +24,7 @@ import {
 } from "@actions/planner";
 import { PlannerWidget } from "@components/PlannerWidget";
 import { DashboardLoader } from "@components/Loader";
-
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 // --- TYPES ---
 type ModuleStatus = 'pending' | 'in-progress' | 'completed';
 type EventType = "Class" | "Study" | "Test" | "Break" | "Project";
@@ -358,7 +358,8 @@ export default function CourseDetailPage() {
                 <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Module Hierarchy</h3>
                 <button 
                   onClick={openAddModule} 
-                  className="bg-zinc-900 border border-zinc-800 text-[9px] font-black text-white px-4 py-2 rounded-xl hover:bg-white hover:text-black transition-all uppercase tracking-widest"
+                  className="bg-zinc-900 border border-zinc-800 text-[9px] font-black text-white px-4 py-2 rounded-xl
+                   hover:bg-white hover:text-black transition-all uppercase tracking-widest"
                 >
                   + Create Module
                 </button>
@@ -366,7 +367,7 @@ export default function CourseDetailPage() {
 
               <div className="space-y-4">
                 {modules.map((module: any) => (
-                  <div key={module.id} className="bg-[#090909] border border-zinc-900 rounded-[2rem] overflow-hidden transition-all duration-300">
+                  <div key={module.id} className="bg-[#090909] border border-zinc-900 rounded-[2rem]  transition-all duration-300">
                     <div className="flex items-center justify-between p-6 cursor-pointer hover:bg-zinc-900/40 transition-all group" onClick={() => toggleModuleOpen(module.id)}>
                       <div className="flex items-center gap-4 flex-1">
                         <div className="w-8 h-8 rounded-lg bg-black border border-zinc-800 flex items-center justify-center text-zinc-500">
@@ -384,7 +385,7 @@ export default function CourseDetailPage() {
                             {getStatusLabel(module.status)} <ChevronDown size={10} />
                           </button>
                           {activeStatusMenuId === module.id && (
-                            <div ref={statusMenuRef} className="absolute right-0 top-10 w-40 bg-black border border-zinc-800 rounded-xl shadow-2xl z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95">
+                            <div ref={statusMenuRef} className="absolute right-0 top-10 w-40 bg-black border border-zinc-800 rounded-xl shadow-2xl z-[100] py-1 overflow-hidden animate-in fade-in zoom-in-95">
                                <button onClick={() => handleUpdateStatus(module.id, 'pending')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-900 flex items-center gap-2 text-zinc-500"><Circle size={12}/> Pending</button>
                                <button onClick={() => handleUpdateStatus(module.id, 'in-progress')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-900 flex items-center gap-2 text-indigo-500"><PlayCircle size={12}/> Progress</button>
                                <button onClick={() => handleUpdateStatus(module.id, 'completed')} className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-zinc-900 flex items-center gap-2 text-emerald-500"><CheckCircle2 size={12}/> Finalized</button>
